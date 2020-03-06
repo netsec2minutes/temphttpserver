@@ -1,0 +1,16 @@
+#!/usr/bin/python
+#importacao dos Modulos
+import SimpleHTTPServer
+import SocketServer
+
+
+#definicao de variaveis
+PORT = 8888
+
+#Vinculo do Modulo
+modulohttp = SimpleHTTPServer.SimpleHTTPRequestHandler
+
+#Vinculo das variaveis
+temphttpserver = SocketServer.TCPServer(("", PORT), modulohttp)
+print("Criando meu Web Server Temporario..."), PORT
+temphttpserver.serve_forever()
