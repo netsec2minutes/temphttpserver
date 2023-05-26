@@ -5,6 +5,10 @@ on:
  pull_request:
    branches: [ master ]
 jobs:
-  -uses: PortSwigger/dastardly-github-action@main
-   with:
-     target-url: 'https://ginandjuice.shop'
+  dast:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Run Dastardly Action Step
+       uses: PortSwigger/dastardly-github-action@main
+       with:
+         target-url: 'http://35.81.32.236:3000/'
