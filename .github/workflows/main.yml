@@ -6,6 +6,6 @@ on:
    branches: [ master ]
 jobs:
   dast:
-    uses: PortSwigger/dastardly-github-action@main
+    uses: PortSwigger/dastardly-github-action@v1.0.0
     with:
       target-url: 'http://35.81.32.236:3000/'
