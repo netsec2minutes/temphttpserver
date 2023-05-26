@@ -6,5 +6,5 @@ on:
    branches: [ master ]
 jobs:
   -uses: PortSwigger/dastardly-github-action@main
-    with:
-      target-url: 'https://ginandjuice.shop'
+   with:
+    target-url: 'https://ginandjuice.shop'
