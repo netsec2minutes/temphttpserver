@@ -7,4 +7,4 @@ on:
 jobs:
   -uses: PortSwigger/dastardly-github-action@main
    with:
-    target-url: 'https://ginandjuice.shop'
+     target-url: 'https://ginandjuice.shop'
