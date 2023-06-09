@@ -37,10 +37,6 @@ jobs:
         path: ./zap_report.sarif # Certifique-se de que esse é o caminho correto para o seu arquivo zap_report.sarif
         retention-days: 5
 
-    - name: cat2
-      run: zap_report.sarif
-
-
   import:
     name: Conviso Findings Importation
     needs: zap
