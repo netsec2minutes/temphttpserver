@@ -23,8 +23,8 @@ jobs:
     - name: List files in current directory
       run: ls -la
 
-    - name: pwd
-      run: pwd
+    - name: cat
+      run: cat report_json.json
 
 
     - name: Set up Python 3.9
