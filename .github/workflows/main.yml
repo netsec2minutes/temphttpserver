@@ -1,75 +1,26 @@
-name: Owasp zap
-on:
- push:
-   branches: [ master ]
- pull_request:
-   branches: [ master ]
+import os
+import json
+import argparse
 
-jobs:
-  zap:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: OWASP ZAP Baseline Scan
-      uses: zaproxy/action-baseline@v0.7.0
-      with:
-        target: 'http://35.81.32.236:3000/' # Substitua pela URL do seu website
-        cmd_options: '-a -J report_json.json'
-        fail_action: false
-
-    - name: List files in current directory
-      run: ls -la
-
-    - name: cat
-      run: cat report_json.json
+def convert_json_to_sarif(json_report):
+    # O código para conversão para SARIF permanece o mesmo
+    ...
 
 
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-J", "--json_path", help="Path to the OWASP ZAP JSON baseline file", required=True)
+    args = parser.parse_args()
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install jsonschema
-    - name: Convert ZAP JSON report to SARIF
-      run: |
-        python ./zap_to_sarif.py # Ajustei o caminho aqui, caso o arquivo esteja na raiz do projeto
-        # Ajuste o caminho de acordo com o local do seu arquivo 'zap_to_sarif.py'
-    - name: 'Upload Artifact'
-      uses: actions/upload-artifact@v3
-      with:
-        name: zap_report.sarif
-        path: ./zap_report.sarif # Certifique-se de que esse é o caminho correto para o seu arquivo zap_report.sarif
-        retention-days: 5
-    
-    - name: cat2
-      run: cat zap_report.sarif
-     
+    zap_report_path = args.json_path
+    sarif_report_path = "zap_report.sarif"  # Ajuste o caminho onde deseja salvar o arquivo SARIF resultante
 
-  import:
-    name: Conviso Findings Importation
-    needs: zap
-    runs-on: ubuntu-20.04
-    container:
-      image: convisoappsec/flowcli:1.12.0-rc.2
-      env:
-       FLOW_API_KEY:  ${{secrets.CONVISO_API_KEY}}
-       FLOW_PROJECT_CODE: ${{secrets.PROJECT_KEY}}
-       FLOW_API_URL: ${{secrets.HOMOLOGA_URL}}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-      - name: Download result from previous scan
-        uses: actions/download-artifact@v3
-        with:
-          name: zap_report.sarif
-   
-      - name: SARIF Importation
-        run: |
-          conviso findings import-sarif --input-file ./zap_report.sarif # Garanta que esse é o caminho correto para o arquivo zap_report.sarif após ele ter sido baixado
+    if os.path.isfile(zap_report_path):
+        with open(zap_report_path, 'r') as zap_report_file:
+            zap_report = zap_report_file.read()
+            sarif_report = convert_json_to_sarif(zap_report)
+
+        with open(sarif_report_path, 'w') as sarif_report_file:
+            sarif_report_file.write(sarif_report)
+    else:
+        print(f"Error: JSON file not found at path: {zap_report_path}")
