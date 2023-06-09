@@ -3,13 +3,13 @@ import json
 
 def convert_zap_json_to_sarif(json_report):
     sarif_report = {
-        "$schema": "https://json.schemastore.org/sarif-2.1.0-rtm.5.json",
         "version": "2.1.0",
+        "$schema": "https://json.schemastore.org/sarif-2.1.0-rtm.5.json",
         "runs": [
             {
                 "tool": {
                     "driver": {
-                        "informationUri": "https://github.com/your-zap-tool",
+                        "informationUri": "https://github.com/zaproxy/zaproxy",
                         "name": "OWASP ZAP",
                         "rules": []
                     }
@@ -21,40 +21,41 @@ def convert_zap_json_to_sarif(json_report):
 
     zap_report = json.loads(json_report)
 
-    if 'results' not in zap_report:
-        print("No 'results' key in the report.")
+    if 'alerts' not in zap_report:
+        print("No 'alerts' key in the report.")
         return json.dumps(sarif_report)
 
-    for result in zap_report['results']:
-        rule_id = result['ruleId']
-        message_text = result['message']['text']
-        help_uri = result.get('helpUri', '')
-
+    rule_index = 0
+    for alert in zap_report['alerts']:
+        rule_id = alert['pluginid']
         sarif_report['runs'][0]['tool']['driver']['rules'].append({
             "id": rule_id,
-            "name": rule_id,
+            "name": alert['alert'],
             "shortDescription": {
-                "text": message_text
+                "text": alert['desc']
             },
-            "helpUri": help_uri
+            "helpUri": alert['reference']
         })
 
         sarif_report['runs'][0]['results'].append({
             "ruleId": rule_id,
+            "ruleIndex": rule_index,
             "level": "error",
             "message": {
-                "text": message_text
+                "text": alert['alert']
             },
             "locations": [
                 {
                     "physicalLocation": {
                         "artifactLocation": {
-                            "uri": "metadata"
+                            "uri": alert['url']
                         }
                     }
                 }
             ]
         })
+
+        rule_index += 1
 
     return json.dumps(sarif_report)
 
@@ -62,14 +63,10 @@ def convert_zap_json_to_sarif(json_report):
 if __name__ == "__main__":
     zap_report_path = os.path.join(os.getenv("GITHUB_WORKSPACE"), "report_json.json")
     sarif_report_path = os.path.join(os.getenv("GITHUB_WORKSPACE"), "zap_report.sarif")
-
-    if not os.path.isfile(zap_report_path):
-        print("ZAP report file not found:", zap_report_path)
-        exit(1)
     
     with open(zap_report_path, 'r') as zap_report_file:
         zap_report = zap_report_file.read()
         sarif_report = convert_zap_json_to_sarif(zap_report)
-    
+        
     with open(sarif_report_path, 'w') as sarif_report_file:
         sarif_report_file.write(sarif_report)
