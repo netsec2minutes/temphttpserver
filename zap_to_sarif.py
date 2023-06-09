@@ -21,38 +21,35 @@ def convert_json_to_sarif(json_report):
 
     zap_report = json.loads(json_report)
 
-    if 'rules' in zap_report:
-        for rule in zap_report['rules']:
-            rule_id = rule['id']
+    if 'alerts' in zap_report:
+        for alert in zap_report['alerts']:
+            rule_id = alert['pluginid']
             sarif_report['runs'][0]['tool']['driver']['rules'].append({
                 "id": rule_id,
-                "name": rule['name'],
+                "name": alert['alert'],
                 "shortDescription": {
-                    "text": rule['name']
+                    "text": alert['alert']
                 }
             })
 
-    if 'results' in zap_report:
-        for result in zap_report['results']:
-            rule_id = result['ruleId']
             sarif_report['runs'][0]['results'].append({
                 "ruleId": rule_id,
                 "level": "error",
                 "message": {
-                    "text": result['message']
+                    "text": alert['desc']
                 },
                 "locations": [
                     {
                         "physicalLocation": {
                             "artifactLocation": {
-                                "uri": result['locations'][0]['physicalLocation']['artifactLocation']['uri']
+                                "uri": zap_report['site'][0]['@name']
                             }
                         }
                     }
                 ]
             })
 
-    return json.dumps(sarif_report)
+    return sarif_report
 
 
 if __name__ == "__main__":
@@ -68,10 +65,10 @@ if __name__ == "__main__":
         exit(1)
 
     with open(zap_report_path, 'r') as zap_report_file:
-        zap_report = zap_report_file.read()
+        zap_report = json.load(zap_report_file)
         sarif_report = convert_json_to_sarif(zap_report)
 
     with open(sarif_report_path, 'w') as sarif_report_file:
-        sarif_report_file.write(sarif_report)
+        json.dump(sarif_report, sarif_report_file)
 
     print("Conversion to SARIF completed successfully.")
