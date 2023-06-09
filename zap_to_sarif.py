@@ -10,7 +10,7 @@ def convert_zap_json_to_sarif(json_report):
                 "tool": {
                     "driver": {
                         "informationUri": "https://github.com/goodwithtech/dockle",
-                        "name": "Dockle",
+                        "name": "OWASP ZAP",
                         "rules": []
                     }
                 },
