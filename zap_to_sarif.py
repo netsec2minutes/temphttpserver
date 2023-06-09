@@ -3,13 +3,14 @@ import json
 
 def convert_zap_json_to_sarif(json_report):
     sarif_report = {
-        "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+        "$schema": "https://json.schemastore.org/sarif-2.1.0-rtm.5.json",
         "version": "2.1.0",
         "runs": [
             {
                 "tool": {
                     "driver": {
-                        "name": "OWASP ZAP",
+                        "informationUri": "https://github.com/goodwithtech/dockle",
+                        "name": "Dockle",
                         "rules": []
                     }
                 },
@@ -45,15 +46,14 @@ def convert_zap_json_to_sarif(json_report):
                 {
                     "physicalLocation": {
                         "artifactLocation": {
-                            "uri": alert['uri']
+                            "uri": alert['url']
                         }
                     }
                 }
             ]
         })
 
-    return json.dumps(sarif_report)
-
+    return json.dumps(sarif_report, indent=2)
 
 if __name__ == "__main__":
     zap_report_path = os.path.join(os.getenv("GITHUB_WORKSPACE"), "report_json.json")
@@ -62,6 +62,6 @@ if __name__ == "__main__":
     with open(zap_report_path) as zap_report_file:
         zap_report = zap_report_file.read()
         sarif_report = convert_zap_json_to_sarif(zap_report)
-        
+    
     with open(sarif_report_path, 'w') as sarif_report_file:
         sarif_report_file.write(sarif_report)
