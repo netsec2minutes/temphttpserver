@@ -19,33 +19,37 @@ def convert_json_to_sarif(json_report):
         ]
     }
 
-    if 'alerts' in json_report:
-        for alert in json_report['alerts']:
-            rule_id = alert['pluginid']
-            sarif_report['runs'][0]['tool']['driver']['rules'].append({
-                "id": rule_id,
-                "name": alert['alert'],
-                "shortDescription": {
-                    "text": alert['alert']
-                }
-            })
-
-            sarif_report['runs'][0]['results'].append({
-                "ruleId": rule_id,
-                "level": "error",
-                "message": {
-                    "text": alert['desc']
-                },
-                "locations": [
-                    {
-                        "physicalLocation": {
-                            "artifactLocation": {
-                                "uri": json_report['site'][0]['@name']
-                            }
-                        }
+    if 'site' in json_report:
+        site = json_report['site'][0]
+        if 'alerts' in site:
+            for alert in site['alerts']:
+                rule_id = alert['pluginid']
+                sarif_report['runs'][0]['tool']['driver']['rules'].append({
+                    "id": rule_id,
+                    "name": alert['name'],
+                    "shortDescription": {
+                        "text": alert['alert']
                     }
-                ]
-            })
+                })
+
+                instances = alert.get('instances', [])
+                for instance in instances:
+                    sarif_report['runs'][0]['results'].append({
+                        "ruleId": rule_id,
+                        "level": "error",
+                        "message": {
+                            "text": alert['desc']
+                        },
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {
+                                        "uri": instance['uri']
+                                    }
+                                }
+                            }
+                        ]
+                    })
 
     return sarif_report
 
@@ -54,7 +58,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-J", "--json_path", help="Path to the OWASP ZAP JSON baseline file")
     args = parser.parse_args()
-    
+
     zap_report_path = args.json_path
     sarif_report_path = "zap_report.sarif"  # Ajuste o caminho onde deseja salvar o arquivo SARIF resultante
 
