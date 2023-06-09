@@ -1,38 +1,75 @@
 import json
-import sys
+import argparse
 
-def convert_to_sarif(json_path):
-    # Ler o arquivo JSON de entrada
-    with open(json_path, 'r') as json_file:
-        zap_report = json.load(json_file)
+def convert_json_to_sarif(json_report):
+    sarif_report = {
+        "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "DASTARDLY",
+                        "version": "1.0.0",
+                        "rules": []
+                    }
+                },
+                "results": []
+            }
+        ]
+    }
 
-    # Realizar a conversão para SARIF
-    sarif_report = convert_to_sarif_format(zap_report)
+    zap_report = json.loads(json_report)
 
-    # Verificar se o relatório SARIF foi gerado corretamente
-    if sarif_report is not None:
-        # Salvar o relatório SARIF em um arquivo
-        with open('zap_report.sarif', 'w') as sarif_report_file:
-            sarif_report_file.write(sarif_report)
-        print("Conversão para SARIF concluída com sucesso.")
-    else:
-        print("Erro ao gerar o relatório SARIF.")
-        sys.exit(1)
+    if 'rules' in zap_report:
+        for rule in zap_report['rules']:
+            rule_id = rule['id']
+            sarif_report['runs'][0]['tool']['driver']['rules'].append({
+                "id": rule_id,
+                "name": rule['name'],
+                "shortDescription": {
+                    "text": rule['name']
+                }
+            })
 
-def convert_to_sarif_format(zap_report):
-    # Implemente aqui a lógica de conversão do JSON do OWASP ZAP para o formato SARIF
-    # ...
-    # Código de conversão aqui
-    # ...
-    return sarif_report
+    if 'results' in zap_report:
+        for result in zap_report['results']:
+            rule_id = result['ruleId']
+            sarif_report['runs'][0]['results'].append({
+                "ruleId": rule_id,
+                "level": "error",
+                "message": {
+                    "text": result['message']
+                },
+                "locations": [
+                    {
+                        "physicalLocation": {
+                            "artifactLocation": {
+                                "uri": result['locations'][0]['physicalLocation']['artifactLocation']['uri']
+                            }
+                        }
+                    }
+                ]
+            })
 
-# Verificar se o caminho do arquivo JSON foi fornecido como argumento
-if len(sys.argv) != 3 or sys.argv[1] != '-J':
-    print("usage: zap_to_sarif.py -J JSON_PATH")
-    sys.exit(2)
+    return json.dumps(sarif_report)
 
-# Obter o caminho do arquivo JSON
-json_path = sys.argv[2]
 
-# Chamar a função de conversão
-convert_to_sarif(json_path)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-J", "--json_path", help="Path to the OWASP ZAP JSON baseline file")
+    args = parser.parse_args()
+    
+    zap_report_path = args.json_path
+    sarif_report_path = "zap_report.sarif"  # Ajuste o caminho onde deseja salvar o arquivo SARIF resultante
+
+    if zap_report_path is None:
+        print("ERROR: Path to JSON file is missing.")
+        exit(1)
+
+    with open(zap_report_path, 'r') as zap_report_file:
+        zap_report = zap_report_file.read()
+        sarif_report = convert_json_to_sarif(zap_report)
+
+    with open(sarif_report_path, 'w') as sarif_report_file:
+        sarif_report_file.write(sarif_report)
