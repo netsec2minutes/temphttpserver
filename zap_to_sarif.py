@@ -30,21 +30,27 @@ def convert_json_to_sarif(json_report):
                 }
             })
 
+            instance_locations = []
+            for instance in alert['instances']:
+                instance_location = {
+                    "physicalLocation": {
+                        "artifactLocation": {
+                            "uri": instance['uri']
+                        }
+                    },
+                    "region": {
+                        "startLine": 1
+                    }
+                }
+                instance_locations.append(instance_location)
+
             sarif_report['runs'][0]['results'].append({
                 "ruleId": rule_id,
                 "level": "error",
                 "message": {
                     "text": alert['desc']
                 },
-                "locations": [
-                    {
-                        "physicalLocation": {
-                            "artifactLocation": {
-                                "uri": json_report['site'][0]['@name']
-                            }
-                        }
-                    }
-                ]
+                "locations": instance_locations
             })
 
     return sarif_report
@@ -63,7 +69,7 @@ if __name__ == "__main__":
         exit(1)
 
     with open(zap_report_path, 'r') as zap_report_file:
-        zap_report = json.loads(zap_report_file.read())
+        zap_report = json.load(zap_report_file)
         sarif_report = convert_json_to_sarif(zap_report)
 
     with open(sarif_report_path, 'w') as sarif_report_file:
