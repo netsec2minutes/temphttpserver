@@ -64,6 +64,10 @@ if __name__ == "__main__":
     zap_report_path = args.json_path
     sarif_report_path = "zap_report.sarif"  # Ajuste o caminho onde deseja salvar o arquivo SARIF resultante
 
+    if zap_report_path is None:
+        print("ERROR: Path to JSON file is missing.")
+        exit(1)
+
     with open(zap_report_path, 'r') as zap_report_file:
         zap_report = zap_report_file.read()
         sarif_report = convert_json_to_sarif(zap_report)
