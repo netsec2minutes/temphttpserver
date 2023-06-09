@@ -73,3 +73,5 @@ if __name__ == "__main__":
 
     with open(sarif_report_path, 'w') as sarif_report_file:
         sarif_report_file.write(sarif_report)
+
+    print("Conversion to SARIF completed successfully.")
