@@ -19,10 +19,8 @@ def convert_json_to_sarif(json_report):
         ]
     }
 
-    zap_report = json.loads(json_report)
-
-    if 'alerts' in zap_report:
-        for alert in zap_report['alerts']:
+    if 'alerts' in json_report:
+        for alert in json_report['alerts']:
             rule_id = alert['pluginid']
             sarif_report['runs'][0]['tool']['driver']['rules'].append({
                 "id": rule_id,
@@ -42,7 +40,7 @@ def convert_json_to_sarif(json_report):
                     {
                         "physicalLocation": {
                             "artifactLocation": {
-                                "uri": zap_report['site'][0]['@name']
+                                "uri": json_report['site'][0]['@name']
                             }
                         }
                     }
