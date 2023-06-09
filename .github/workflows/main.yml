@@ -36,7 +36,8 @@ jobs:
       with:
         name: zap_report.sarif
         path: ./zap_report.sarif # Certifique-se de que esse é o caminho correto para o seu arquivo zap_report.sarif
-
+    - name: SARIF
+      run: cat zap_report.sarif
   import:
     name: Conviso Findings Importation
     needs: zap
