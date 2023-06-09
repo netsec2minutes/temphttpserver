@@ -11,7 +11,6 @@ jobs:
   zap:
     runs-on: ubuntu-latest
 
-
     - name: OWASP ZAP Baseline Scan
       uses: zaproxy/action-baseline@v0.7.0
       with:
@@ -24,7 +23,6 @@ jobs:
 
     - name: pwd
       run: pwd
-
 
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
