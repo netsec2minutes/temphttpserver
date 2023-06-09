@@ -45,7 +45,7 @@ def convert_zap_json_to_sarif(json_report):
                 {
                     "physicalLocation": {
                         "artifactLocation": {
-                            "uri": alert['url']
+                            "uri": alert['uri']
                         }
                     }
                 }
@@ -59,8 +59,9 @@ if __name__ == "__main__":
     zap_report_path = os.path.join(os.getenv("GITHUB_WORKSPACE"), "report.json")
     sarif_report_path = os.path.join(os.getenv("GITHUB_WORKSPACE"), "zap_report.sarif")
     
-    with open(zap_report_path, 'w') as sarif_report_file:
-        with open(zap_report_path) as zap_report_file:
-            zap_report = zap_report_file.read()
-            sarif_report = convert_zap_json_to_sarif(zap_report)
+    with open(zap_report_path) as zap_report_file:
+        zap_report = zap_report_file.read()
+        sarif_report = convert_zap_json_to_sarif(zap_report)
+        
+        with open(sarif_report_path, 'w') as sarif_report_file:
             sarif_report_file.write(sarif_report)
