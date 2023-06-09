@@ -24,3 +24,4 @@ if __name__ == "__main__":
             sarif_report_file.write(sarif_report)
     else:
         print(f"Error: JSON file not found at path: {zap_report_path}")
+
