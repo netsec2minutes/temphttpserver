@@ -9,6 +9,7 @@ def convert_zap_json_to_sarif(json_report):
             {
                 "tool": {
                     "driver": {
+                        "informationUri": "https://github.com/your-zap-tool",
                         "name": "OWASP ZAP",
                         "rules": []
                     }
@@ -20,32 +21,35 @@ def convert_zap_json_to_sarif(json_report):
 
     zap_report = json.loads(json_report)
 
-    if 'alerts' not in zap_report:
-        print("No 'alerts' key in the report.")
+    if 'results' not in zap_report:
+        print("No 'results' key in the report.")
         return json.dumps(sarif_report)
 
-    for alert in zap_report['alerts']:
-        rule_id = alert['pluginid']
+    for result in zap_report['results']:
+        rule_id = result['ruleId']
+        message_text = result['message']['text']
+        help_uri = result.get('helpUri', '')
+
         sarif_report['runs'][0]['tool']['driver']['rules'].append({
             "id": rule_id,
-            "name": alert['alert'],
+            "name": rule_id,
             "shortDescription": {
-                "text": alert['desc']
+                "text": message_text
             },
-            "helpUri": alert['reference']
+            "helpUri": help_uri
         })
 
         sarif_report['runs'][0]['results'].append({
             "ruleId": rule_id,
             "level": "error",
             "message": {
-                "text": alert['alert']
+                "text": message_text
             },
             "locations": [
                 {
                     "physicalLocation": {
                         "artifactLocation": {
-                            "uri": alert['url']
+                            "uri": "metadata"
                         }
                     }
                 }
@@ -58,6 +62,10 @@ def convert_zap_json_to_sarif(json_report):
 if __name__ == "__main__":
     zap_report_path = os.path.join(os.getenv("GITHUB_WORKSPACE"), "report_json.json")
     sarif_report_path = os.path.join(os.getenv("GITHUB_WORKSPACE"), "zap_report.sarif")
+
+    if not os.path.isfile(zap_report_path):
+        print("ZAP report file not found:", zap_report_path)
+        exit(1)
     
     with open(zap_report_path, 'r') as zap_report_file:
         zap_report = zap_report_file.read()
