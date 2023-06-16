@@ -1,0 +1,51 @@
+name: Nuclei - Vulnerability Scan
+
+on:
+    schedule:
+      - cron: '0 0 * * *'
+    workflow_dispatch:
+
+jobs:
+  nuclei-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Nuclei - Vulnerability Scan
+        uses: projectdiscovery/nuclei-action@main
+        with:
+          target: http://35.81.32.236:3000/
+
+      - name: GitHub Workflow artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: nuclei.log
+          path: nuclei.log
+
+      - name: GitHub Security Dashboard Alerts update
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: nuclei.sarif
+          
+  import:
+    name: Conviso Findings Importation
+    needs: nuclei-scan
+    runs-on: ubuntu-20.04
+    container:
+      image: convisoappsec/flowcli:1.12.0-rc.2
+      env:
+        FLOW_API_KEY: ${{ secrets.CONVISO_API_KEY }}
+        FLOW_PROJECT_CODE: ${{ secrets.PROJECT_KEY }}
+        FLOW_API_URL: ${{ secrets.HOMOLOGA_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download result from previous scan
+        uses: actions/download-artifact@v3
+        with:
+          name: nuclei.sarif
+
+      - name: SARIF Importation
+        run: |
+          conviso findings import-sarif --input-file nuclei.sarif
