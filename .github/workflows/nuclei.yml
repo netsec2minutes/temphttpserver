@@ -27,6 +27,12 @@ jobs:
         with:
           sarif_file: nuclei.sarif
           
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: nuclei.sarif
+          path: nuclei.sarif
+          
   import:
     name: Conviso Findings Importation
     needs: nuclei-scan
