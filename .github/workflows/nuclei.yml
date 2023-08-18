@@ -15,7 +15,7 @@ jobs:
       - name: Nuclei - Vulnerability Scan
         uses: projectdiscovery/nuclei-action@main
         with:
-          target: http://35.81.32.236:3000/
+          target: http://testaspnet.vulnweb.com/
 
       - name: GitHub Workflow artifacts
         uses: actions/upload-artifact@v2
