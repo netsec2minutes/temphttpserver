@@ -52,7 +52,7 @@ jobs:
     needs: zap
     runs-on: ubuntu-20.04
     container:
-      image: convisoappsec/flowcli:1.12.0-rc.2
+      image: convisoappsec/conviso-flowcli
       env:
         FLOW_API_KEY: ${{ secrets.CONVISO_API_KEY }}
         FLOW_API_URL: ${{ secrets.HOMOLOGA_URL }}
