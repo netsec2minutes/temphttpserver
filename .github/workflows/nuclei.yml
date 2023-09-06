@@ -43,7 +43,6 @@ jobs:
       image: convisoappsec/flowcli:1.12.0-rc.2
       env:
         FLOW_API_KEY: ${{ secrets.CONVISO_API_KEY }}
-        FLOW_PROJECT_CODE: ${{ secrets.PROJECT_KEY }}
         FLOW_API_URL: ${{ secrets.HOMOLOGA_URL }}
     steps:
       - name: Checkout code
