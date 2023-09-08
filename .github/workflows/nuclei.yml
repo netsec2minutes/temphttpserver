@@ -57,4 +57,4 @@ jobs:
 
       - name: SARIF Importation
         run: |
-          conviso findings import-sarif --input-file nuclei.sarif
+          conviso findings import-sarif --project-code "hJFfrY7f7EUamYG9" --input-file nuclei.sarif
