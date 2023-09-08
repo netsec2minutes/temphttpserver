@@ -68,4 +68,4 @@ jobs:
 
       - name: SARIF Importation
         run: |
-          conviso findings import-sarif --input-file ./zap_report.sarif
+          conviso findings import-sarif --project-code "hJFfrY7f7EUamYG9" --input-file ./zap_report.sarif
